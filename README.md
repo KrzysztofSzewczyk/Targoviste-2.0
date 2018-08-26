@@ -19,3 +19,7 @@ Key features:
  SUM:                             2             81            182            303
  -------------------------------------------------------------------------------
  ```
+
+## TAR format drawing
+
+![Drawing](https://cdn.rawgit.com/TargovisteDevelopment/Targoviste-2.0/59b65bca/TAR.png)
