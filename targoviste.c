@@ -45,6 +45,32 @@ typedef struct {
 } tgx_raw_header_t;
 
 /**
+ * Wrappers over file writing & reading, you may override
+ * them to integrate your compression method to Targoviste
+ * These functions are part of internal API.
+ */
+
+static int file_write(tgx_t * tar, const void * data, unsigned size) {
+    unsigned res = fwrite(data, 1, size, tar->stream);
+    return (res == size) ? TARGOVISTE_ESUCCES : TARGOVISTE_EWRITEFAIL;
+}
+
+static int file_read(tgx_t * tar, void * data, unsigned size) {
+    unsigned res = fread(data, 1, size, tar->stream);
+    return (res == size) ? TARGOVISTE_ESUCCES : TARGOVISTE_EREADFAIL;
+}
+
+static int file_seek(tgx_t * tar, unsigned offset) {
+    int res = fseek(tar->stream, offset, SEEK_SET);
+    return (res == 0) ? TARGOVISTE_ESUCCES : TARGOVISTE_ESEEKFAIL;
+}
+
+static int file_close(tgx_t * tar) {
+    fclose(tar->stream);
+    return TARGOVISTE_ESUCCES;
+}
+
+/**
  * Round up n to be divisible by incr.
  * This function is part of internal API
  */
@@ -76,14 +102,14 @@ static unsigned checksum(const tgx_raw_header_t * rh) {
  */
 
 static int tread(tgx_t * tar, void * data, unsigned size) {
-    int err = tar->read(tar, data, size);
+    int err = file_read(tar, data, size);
     tar->pos += size;
     return err;
 }
 
 
 static int twrite(tgx_t * tar, const void * data, unsigned size) {
-    int err = tar->write(tar, data, size);
+    int err = file_write(tar, data, size);
     tar->pos += size;
     return err;
 }
@@ -148,32 +174,6 @@ static int header_to_raw(tgx_raw_header_t * rh, const tgx_header_t * h) {
     return TARGOVISTE_ESUCCES;
 }
 
-/**
- * Wrappers over file writing & reading, you may override
- * them to integrate your compression method to Targoviste
- * These functions are part of internal API.
- */
-
-static int file_write(tgx_t * tar, const void * data, unsigned size) {
-    unsigned res = fwrite(data, 1, size, tar->stream);
-    return (res == size) ? TARGOVISTE_ESUCCES : TARGOVISTE_EWRITEFAIL;
-}
-
-static int file_read(tgx_t * tar, void * data, unsigned size) {
-    unsigned res = fread(data, 1, size, tar->stream);
-    return (res == size) ? TARGOVISTE_ESUCCES : TARGOVISTE_EREADFAIL;
-}
-
-static int file_seek(tgx_t * tar, unsigned offset) {
-    int res = fseek(tar->stream, offset, SEEK_SET);
-    return (res == 0) ? TARGOVISTE_ESUCCES : TARGOVISTE_ESEEKFAIL;
-}
-
-static int file_close(tgx_t * tar) {
-    fclose(tar->stream);
-    return TARGOVISTE_ESUCCES;
-}
-
 int tgx_open(tgx_t * tar, const char * filename, const char * mode) {
     int err;
     tgx_header_t h;
@@ -195,11 +195,11 @@ int tgx_open(tgx_t * tar, const char * filename, const char * mode) {
 }
 
 int tgx_close(tgx_t * tar) {
-    return tar->close(tar);
+    return file_close(tar);
 }
 
 int tgx_seek(tgx_t * tar, unsigned pos) {
-    int err = tar->seek(tar, pos);
+    int err = file_seek(tar, pos);
     tar->pos = pos;
     return err;
 }
