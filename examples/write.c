@@ -8,7 +8,7 @@ int main() {
     /* Open archive */
     tgx_open(&tar, "example.tgx", "r");
     /* List files */
-    while ( (tgx_read_header(&tar, &h)) != TGX_ENULLRECORD ) {
+    while ( (tgx_read_header(&tar, &h)) != TARGOVISTE_ENULLRECORD ) {
         printf("%s (%d bytes)\n", h.name, h.size);
         tgx_next(&tar);
     }
