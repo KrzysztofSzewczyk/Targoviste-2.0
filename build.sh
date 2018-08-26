@@ -23,7 +23,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-gcc -c targoviste.c -o targoviste.o
+gcc -c targoviste.c -Os -o targoviste.o
 ar rcs libtargoviste.a targoviste.o
 
 # gcc examples/read.c -o examples/read -ltargoviste
