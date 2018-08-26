@@ -101,7 +101,7 @@ static int write_null_bytes(tgx_t * tar, int n) {
         if (err)
             return err;
     }
-    return TARGOVISTE_ESUCCESS;
+    return TARGOVISTE_ESUCCES;
 }
 
 /**
@@ -116,7 +116,7 @@ static int raw_to_header(tgx_header_t * h, const tgx_raw_header_t * rh) {
     chksum1 = checksum(rh);
     sscanf(rh->checksum, "%o", &chksum2);
     if (chksum1 != chksum2)
-        return TARGOVISTE_EBADCHKSUM;
+        return TARGOVISTE_EBADCHK;
     sscanf(rh->mode, "%o", &h->mode);
     sscanf(rh->owner, "%o", &h->owner);
     sscanf(rh->size, "%o", &h->size);
@@ -124,7 +124,7 @@ static int raw_to_header(tgx_header_t * h, const tgx_raw_header_t * rh) {
     h->type = rh->type;
     strcpy(h->name, rh->name);
     strcpy(h->linkname, rh->linkname);
-    return TARGOVISTE_ESUCCESS;
+    return TARGOVISTE_ESUCCES;
 }
 
 /**
@@ -145,7 +145,7 @@ static int header_to_raw(tgx_raw_header_t * rh, const tgx_header_t * h) {
     chksum = checksum(rh);
     sprintf(rh->checksum, "%06o", chksum);
     rh->checksum[7] = ' ';
-    return TARGOVISTE_ESUCCESS;
+    return TARGOVISTE_ESUCCES;
 }
 
 /**
@@ -156,22 +156,22 @@ static int header_to_raw(tgx_raw_header_t * rh, const tgx_header_t * h) {
 
 static int file_write(tgx_t * tar, const void * data, unsigned size) {
     unsigned res = fwrite(data, 1, size, tar->stream);
-    return (res == size) ? TARGOVISTE_ESUCCESS : TARGOVISTE_EWRITEFAIL;
+    return (res == size) ? TARGOVISTE_ESUCCES : TARGOVISTE_EWRITEFAIL;
 }
 
 static int file_read(tgx_t * tar, void * data, unsigned size) {
     unsigned res = fread(data, 1, size, tar->stream);
-    return (res == size) ? TARGOVISTE_ESUCCESS : TARGOVISTE_EREADFAIL;
+    return (res == size) ? TARGOVISTE_ESUCCES : TARGOVISTE_EREADFAIL;
 }
 
 static int file_seek(tgx_t * tar, unsigned offset) {
     int res = fseek(tar->stream, offset, SEEK_SET);
-    return (res == 0) ? TARGOVISTE_ESUCCESS : TARGOVISTE_ESEEKFAIL;
+    return (res == 0) ? TARGOVISTE_ESUCCES : TARGOVISTE_ESEEKFAIL;
 }
 
 static int file_close(tgx_t * tar) {
     fclose(tar->stream);
-    return TARGOVISTE_ESUCCESS;
+    return TARGOVISTE_ESUCCES;
 }
 
 
@@ -192,12 +192,12 @@ int tgx_open(tgx_t * tar, const char * filename, const char * mode) {
         return TARGOVISTE_EOPENFAIL;
     if (*mode == 'r') {
         err = tgx_read_header(tar, &h);
-        if (err != TARGOVISTE_ESUCCESS) {
+        if (err != TARGOVISTE_ESUCCES) {
             tgx_close(tar);
             return err;
         }
     }
-    return TARGOVISTE_ESUCCESS;
+    return TARGOVISTE_ESUCCES;
 }
 
 int tgx_close(tgx_t * tar) {
@@ -246,7 +246,7 @@ int tgx_next(tgx_t * tar) {
  *
  * Return value:
  * If file was found, memory under last parameter is now containing header data
- * and return value is equal to ESUCCESS
+ * and return value is equal to ESUCCES
  */
 
 int tgx_find(tgx_t * tar, const char * name, tgx_header_t * h) {
@@ -255,11 +255,11 @@ int tgx_find(tgx_t * tar, const char * name, tgx_header_t * h) {
     err = tgx_rewind(tar);
     if (err)
         return err;
-    while ( (err = tgx_read_header(tar, &header)) == TARGOVISTE_ESUCCESS ) {
+    while ( (err = tgx_read_header(tar, &header)) == TARGOVISTE_ESUCCES ) {
         if ( !strcmp(header.name, name) ) {
             if (h)
                 *h = header;
-            return TARGOVISTE_ESUCCESS;
+            return TARGOVISTE_ESUCCES;
         }
         tgx_next(tar);
     }
@@ -298,7 +298,7 @@ int tgx_read_header(tgx_t * tar, tgx_header_t * h) {
  * int size    - Amount of bytes to read
  *
  * Return value:
- * TARGOVISTE_ESUCCESS if operation was completed successfully
+ * TARGOVISTE_ESUCCES if operation was completed successfully
  */
 
 int tgx_read_data(tgx_t * tar, void * ptr, unsigned size) {
@@ -319,7 +319,7 @@ int tgx_read_data(tgx_t * tar, void * ptr, unsigned size) {
     tar->remaining_data -= size;
     if (tar->remaining_data == 0)
         return tgx_seek(tar, tar->last_header);
-    return TARGOVISTE_ESUCCESS;
+    return TARGOVISTE_ESUCCES;
 }
 
 int tgx_write_header(tgx_t * tar, const tgx_header_t * h) {
@@ -356,7 +356,7 @@ int tgx_write_data(tgx_t * tar, void * data, unsigned size) {
     tar->remaining_data -= size;
     if (tar->remaining_data == 0)
         return write_null_bytes(tar, round_up(tar->pos, 512) - tar->pos);
-    return TARGOVISTE_ESUCCESS;
+    return TARGOVISTE_ESUCCES;
 }
 
 
@@ -368,13 +368,13 @@ void tgx_strerror(char * message, int err) {
     char * error;
     fputs(message, stderr);
     switch (err) {
-        case TARGOVISTE_ESUCCESS: error = ": no error";
+        case TARGOVISTE_ESUCCES: error = ": no error";
         case TARGOVISTE_EFAILURE: error = ": failure";
         case TARGOVISTE_EOPENFAIL: error = ": could not open";
         case TARGOVISTE_EREADFAIL: error = ": could not read";
         case TARGOVISTE_EWRITEFAIL: error = ": could not write";
         case TARGOVISTE_ESEEKFAIL: error = ": could not seek";
-        case TARGOVISTE_EBADCHKSUM: error = ": bad checksum";
+        case TARGOVISTE_EBADCHK: error = ": bad checksum";
         case TARGOVISTE_ENULLRECORD: error = ": null record";
         case TARGOVISTE_ENOTFOUND: error = ": file not found";
         default: error = ": no error";
