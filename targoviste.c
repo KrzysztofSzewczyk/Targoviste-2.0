@@ -71,7 +71,7 @@ static unsigned checksum(const tgx_raw_header_t * rh) {
 
 
 /**
- * Wrappers standarizing user-defined functions
+ * Wrappers standarizing functions
  * These functions are part of internal API.
  */
 
@@ -174,16 +174,10 @@ static int file_close(tgx_t * tar) {
     return TARGOVISTE_ESUCCES;
 }
 
-
-
 int tgx_open(tgx_t * tar, const char * filename, const char * mode) {
     int err;
     tgx_header_t h;
     memset(tar, 0, sizeof(*tar));
-    tar->write = file_write;
-    tar->read = file_read;
-    tar->seek = file_seek;
-    tar->close = file_close;
     if ( strchr(mode, 'r') ) mode = "rb";
     if ( strchr(mode, 'w') ) mode = "wb";
     if ( strchr(mode, 'a') ) mode = "ab";
@@ -216,16 +210,6 @@ int tgx_rewind(tgx_t * tar) {
     return tgx_seek(tar, 0);
 }
 
-/**
- * TGX_NEXT() - Seek to next record in archive
- *
- * Parameters:
- * tgx_t * tar - Targoviste archive instance
- *
- * Return value:
- * See TGX_SEEK()
- */
-
 int tgx_next(tgx_t * tar) {
     int err, n;
     tgx_header_t h;
@@ -235,19 +219,6 @@ int tgx_next(tgx_t * tar) {
     n = round_up(h.size, 512) + sizeof(tgx_raw_header_t);
     return tgx_seek(tar, tar->pos + n);
 }
-
-/**
- * TGX_FIND() - Find filename in archive, and return it's header
- *
- * Parameters:
- * tgx_t * tar      - Targoviste archive instance
- * char * name      - name of file to find
- * tgx_header_t * h - Pointer to allocated header structure
- *
- * Return value:
- * If file was found, memory under last parameter is now containing header data
- * and return value is equal to ESUCCES
- */
 
 int tgx_find(tgx_t * tar, const char * name, tgx_header_t * h) {
     int err;
@@ -268,14 +239,6 @@ int tgx_find(tgx_t * tar, const char * name, tgx_header_t * h) {
     return err;
 }
 
-/**
- * TGX_READ_HEADER() - Read header from archive
- *
- * Parameters:
- * tgx_t * tar      - Targoviste archive instance
- * tgx_header_t * h - Allocated structure to hold read data
- */
-
 int tgx_read_header(tgx_t * tar, tgx_header_t * h) {
     int err;
     tgx_raw_header_t rh;
@@ -288,18 +251,6 @@ int tgx_read_header(tgx_t * tar, tgx_header_t * h) {
         return err;
     return raw_to_header(h, &rh);
 }
-
-/**
- * TGX_READ_DATA() - Read data from archive to buffer
- *
- * Parameters:
- * tgx_t * tar - Targoviste archive instance
- * void * ptr  - Pointer to buffer
- * int size    - Amount of bytes to read
- *
- * Return value:
- * TARGOVISTE_ESUCCES if operation was completed successfully
- */
 
 int tgx_read_data(tgx_t * tar, void * ptr, unsigned size) {
     int err;

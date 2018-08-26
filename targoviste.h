@@ -77,16 +77,10 @@ typedef struct {
 typedef struct tgx_t tgx_t;
 
 /**
- * Archive structure containing
- * function pointers to read & write methods that may be overriden (check targoviste.c).
- * and general archive data.
+ * Archive structure containing general archive data.
  */
 
 struct tgx_t {
-    int (*read)(tgx_t * tar, void * data, unsigned size);
-    int (*write)(tgx_t * tar, const void * data, unsigned size);
-    int (*seek)(tgx_t * tar, unsigned pos);
-    int (*close)(tgx_t * tar);
     void * stream;
     unsigned pos;
     unsigned remaining_data;
@@ -100,9 +94,7 @@ struct tgx_t {
 void tgx_strerror(char * message, int err);
 
 /**
- * TGX_OPEN() - Open filename as archive in selected mode. Overwrites
- * any handlers previously set, so it's not recommended to run it after
- * manual initialization of archive.
+ * TGX_OPEN() - Open filename as archive in selected mode.
  *
  * Parameters:
  * tgx_t * tar - Targoviste archive instance
@@ -151,9 +143,56 @@ int tgx_seek(tgx_t * tar, unsigned pos);
  */
 
 int tgx_rewind(tgx_t * tar);
+
+/**
+ * TGX_NEXT() - Seek to next record in archive
+ *
+ * Parameters:
+ * tgx_t * tar - Targoviste archive instance
+ *
+ * Return value:
+ * See TGX_SEEK()
+ */
+
 int tgx_next(tgx_t * tar);
+
+/**
+ * TGX_FIND() - Find filename in archive, and return it's header
+ *
+ * Parameters:
+ * tgx_t * tar      - Targoviste archive instance
+ * char * name      - name of file to find
+ * tgx_header_t * h - Pointer to allocated header structure
+ *
+ * Return value:
+ * If file was found, memory under last parameter is now containing header data
+ * and return value is equal to ESUCCES
+ */
+
 int tgx_find(tgx_t * tar, const char * name, tgx_header_t * h);
+
+/**
+ * TGX_READ_HEADER() - Read header from archive
+ *
+ * Parameters:
+ * tgx_t * tar      - Targoviste archive instance
+ * tgx_header_t * h - Allocated structure to hold read data
+ */
+
 int tgx_read_header(tgx_t * tar, tgx_header_t * h);
+
+/**
+ * TGX_READ_DATA() - Read data from archive to buffer
+ *
+ * Parameters:
+ * tgx_t * tar - Targoviste archive instance
+ * void * ptr  - Pointer to buffer
+ * int size    - Amount of bytes to read
+ *
+ * Return value:
+ * TARGOVISTE_ESUCCES if operation was completed successfully
+ */
+
 int tgx_read_data(tgx_t * tar, void * ptr, unsigned size);
 
 /**
