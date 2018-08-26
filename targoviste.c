@@ -330,7 +330,7 @@ int tgx_write_header(tgx_t * tar, const tgx_header_t * h) {
 }
 
 
-int tgx_write_file_header(tgx_t * tar, char * name, unsigned size) {
+int tgx_write_file_header(tgx_t * tar, const char * name, unsigned size) {
     tgx_header_t h;
     memset(&h, 0, sizeof(h));
     strcpy(h.name, name);
@@ -340,7 +340,7 @@ int tgx_write_file_header(tgx_t * tar, char * name, unsigned size) {
     return tgx_write_header(tar, &h);
 }
 
-int tgx_write_dir_header(tgx_t * tar, char * name) {
+int tgx_write_dir_header(tgx_t * tar, const char * name) {
     tgx_header_t h;
     memset(&h, 0, sizeof(h));
     strcpy(h.name, name);
@@ -349,7 +349,7 @@ int tgx_write_dir_header(tgx_t * tar, char * name) {
     return tgx_write_header(tar, &h);
 }
 
-int tgx_write_data(tgx_t * tar, void * data, unsigned size) {
+int tgx_write_data(tgx_t * tar, const void * data, unsigned size) {
     int err = twrite(tar, data, size);
     if (err)
         return err;
