@@ -25,3 +25,5 @@ Key features:
 ## TAR format drawing
 
 ![Drawing](https://cdn.rawgit.com/TargovisteDevelopment/Targoviste-2.0/59b65bca/TAR.png)
+
+This version of targoviste is intended to be used in future projects.
